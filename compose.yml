@@ -37,7 +37,7 @@ services:
       - redis_db
 
     environment:
-      - TEMPORARY_DIR=/working_dir
+      # - TEMPORARY_DIR=/working_dir
       - PARAMETERS_DIR=/parameters
       - VOLUMES_DIR=/volumes
       - UPLOADS_DIR=/uploads
@@ -46,7 +46,7 @@ services:
       - ENABLE_PARAMETERS_LOGGING=${ENABLE_PARAMETERS_LOGGING}
     volumes:
       - ${VOLUMES_DIR}:/volumes
-      - ${TMP_DIR}:/working_dir
+      # - ${TMP_DIR}:/working_dir
       - ${UPLOADS_DIR}:/uploads
       - ${PARAMETERS_DIR}:/parameters
   rq_dashboard:
