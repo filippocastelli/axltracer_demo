@@ -1,0 +1,78 @@
+services:
+  backend:
+    image: axolotl:1.0.0
+    restart: unless-stopped
+    ports:
+      - ${BACKEND_PORT}:8000
+      - 5679:5679  # debug port
+    environment:
+      - REDIS_HOST=redis_db
+      - REDIS_PORT=6379
+      - QUEUE_NAME=tracing
+      - QUEUE_TIMEOUT_SECONDS=3600
+      - JOB_TTL_SECONDS=3600
+      - VOLUMES_DIR=/volumes
+      - UPLOADS_DIR=/uploads
+      - REQUESTS_DIR=/requests
+      - USER_ID=1000
+      - GROUP_ID=1000
+    volumes:
+      - ${UPLOADS_DIR}:/uploads
+      - ${REQUESTS_DIR}:/requests
+      - ${VOLUMES_DIR}:/volumes
+    command: [".venv/bin/fastapi", "run", "/app/app_package/tracer_api/main.py", "--port", "8000"]
+    # command: "sleep infinity"
+
+  redis_db:
+    image: redis:7.4.4
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+  rq_worker:
+    shm_size: "2g"
+    image: axolotl:1.0.0
+    restart: unless-stopped
+    command: ["/app/.venv/bin/rq", "worker-pool", "--url", "redis://redis_db:6379", "--num-workers", "4", "tracing_queue", "syg_conversion_queue"]
+    depends_on:
+      - redis_db
+
+    environment:
+      - TEMPORARY_DIR=/working_dir
+      - PARAMETERS_DIR=/parameters
+      - VOLUMES_DIR=/volumes
+      - UPLOADS_DIR=/uploads
+      - USER_ID=1000
+      - GROUP_ID=1000
+      - ENABLE_PARAMETERS_LOGGING=${ENABLE_PARAMETERS_LOGGING}
+    volumes:
+      - ${VOLUMES_DIR}:/volumes
+      - ${TMP_DIR}:/working_dir
+      - ${UPLOADS_DIR}:/uploads
+      - ${PARAMETERS_DIR}:/parameters
+  rq_dashboard:
+    build:
+      dockerfile: ./rq_dashboard.Dockerfile
+    image: rq-dashboard:0.1.0
+    restart: unless-stopped
+    ports:
+      - ${RQ_DASHBOARD_PORT}:9181
+    command: ["--redis-url", "redis://redis_db:6379"]
+
+  # redis_insight:
+  #   image: redis/redisinsight:2.70
+  #   restart: unless-stopped
+  #   ports:
+  #     - 5540:5540
+
+  sftp:
+    image: atmoz/sftp:alpine
+    restart: unless-stopped
+    ports:
+      - "2222:22"
+    volumes:
+      - ${UPLOADS_DIR}:/home/uploaduser/uploads
+    command: ${SFTP_USER}:${SFTP_PASSWORD}:${SFTP_UID}
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
