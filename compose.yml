@@ -1,6 +1,6 @@
 services:
   backend:
-    image: registry.axltracer.it/axolotl:1.2.0
+    image: registry.axltracer.it/axolotl:latest
     restart: unless-stopped
     ports:
       - ${BACKEND_PORT}:8000
@@ -30,7 +30,7 @@ services:
       - 6379:6379
   rq_worker:
     shm_size: "2g"
-    image: registry.axltracer.it/axolotl:1.2.0
+    image: registry.axltracer.it/axolotl:latest
     restart: unless-stopped
     command: ["/app/.venv/bin/rq", "worker-pool", "--url", "redis://redis_db:6379", "--num-workers", "4", "tracing_queue", "syg_conversion_queue"]
     depends_on:
