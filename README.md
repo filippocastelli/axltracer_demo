@@ -83,6 +83,24 @@ All core images are pulled from the private registry:
 registry.axltracer.it
 ```
 
+## Connecting with syGlass ᯅ 🧠
+
+In order for syGlass to interface with the tracer demo you need to add a configuration file in
+```[bash]
+C:\Users\<your_user_name>\AppData\Local\syGlass\axolotl_config.json
+``` 
+contents should be
+```[json]
+{
+    "api_server": "<your_host>:<your_deploy_port>",
+    "overrides": {
+        "morphological_pruning_level": 250,
+        "fixed_radius": null
+    }
+}
+```
+the config file can contain overrides for the `TracingConfig` request model 
+
 ---
 
 © 2025 Bioretics SRL, Filippo Maria Castelli, Ph.D.

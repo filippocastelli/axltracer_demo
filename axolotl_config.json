@@ -1,0 +1,7 @@
+{
+    "api_server": "localhost:8001",
+    "overrides": {
+        "morphological_pruning_level": 250,
+        "fixed_radius": null
+    }
+}
